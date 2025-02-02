@@ -57,15 +57,12 @@ for idx, audio in enumerate(generation_output):
 
 print("Batch speech generation completed and saved as separate wav files.")
 
-quit()
 from pydub import AudioSegment
-
-
+import glob
 # Get the list of all .wav files in the current directory
-audio_files = [file for file in os.listdir() if file.endswith('.wav')]
+audio_files = [f"output_speech_{i+1}" for i in range(len(glob.glob("./*output_speech*.wav")))]
+print(audio_files)
 
-# Sort the files if needed (optional, if you want a specific order)
-audio_files.sort()
 # Initialize an empty audio segment for merging
 combined = AudioSegment.empty()
 
