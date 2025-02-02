@@ -21,13 +21,15 @@ description_tokenizer = AutoTokenizer.from_pretrained(model.config.text_encoder.
 
 # Define the texts and description for batch generation
 max_length = 16  # Set a max length, adjust as needed for your model
+words_per_part=15
 text="""Machine Learning and Artificial Intelligence (AI) are enabling extraordinary scientific breakthroughs in fields ranging from protein folding, natural language processing, drug synthesis, and recommender systems to the discovery of novel engineering materials and products. These achievements lie at the confluence of mathematics, statistics, engineering and computer science, yet a clear explanation of the remarkable power and also the limitations of such AI systems has eluded scientists from all disciplines. Critical foundational gaps remain that, if not properly addressed, will soon limit advances in machine learning, curbing progress in artificial intelligence. It appears increasingly unlikely that these critical gaps can be surmounted with increased computational power and experimentation alone. Deeper mathematical understanding is essential to ensuring that AI can be harnessed to meet the future needs of society and enable broad scientific discovery, while forestalling the unintended consequences of a disruptive technology."""
 final = []
-for part in split_into_parts(text, words_per_part=4):
+assert max_length > words_per_part
+for part in split_into_parts(text, words_per_part):
     final.append(part)
 print(final)
 
-description = "Laura's voice is very passionate in delivery as a teacher, with a very close recording that almost has no background noise and high quality audio."
+description = "Laura's voice with a very close recording that almost has no background noise and high quality audio. she takes a small stop before speaking"
 
 # Tokenize the description with a specified max_length to avoid truncation issues
 description_input_ids = description_tokenizer(description, return_tensors="pt", padding=True, truncation=True, max_length=max_length).to(device)
