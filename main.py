@@ -60,7 +60,7 @@ print("Batch speech generation completed and saved as separate wav files.")
 from pydub import AudioSegment
 import glob
 # Get the list of all .wav files in the current directory
-audio_files = [f"output_speech_{i+1}" for i in range(len(glob.glob("./*output_speech*.wav")))]
+audio_files = [f"output_speech_{i+1}.wav" for i in range(len(glob.glob("./*output_speech*.wav")))]
 print(audio_files)
 
 # Initialize an empty audio segment for merging
