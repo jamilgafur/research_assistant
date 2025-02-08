@@ -1,0 +1,209 @@
+# Research Assistant with LangGraph Integration
+
+This project is a **Research Assistant** powered by LangGraph, FastAPI, Google Search, and Text-to-Speech (TTS) functionality. The assistant can search for information, summarize text, and read aloud the results using various services and custom models. It also integrates with LangGraph's advanced knowledge graph API for deep insights and querying.
+
+## Features
+
+- **Text Search**: Perform Google searches without API keys using `googlesearch-python`.
+- **Summarization**: Summarize long documents or text using LangGraph's models.
+- **Text-to-Speech (TTS)**: Convert summarized or queried text to speech using `gTTS` and play it with an audio player.
+- **Document Reader**: Read and process documents from a specified folder.
+- **LangGraph Integration**: Seamlessly interact with LangGraph's API to extract structured knowledge.
+
+## Folder Structure
+
+Here’s the structure of the project:
+
+```
+.
+├── research_assistant.py      # Main research assistant script with FastAPI
+├── search_api                 # (Optional) Contains search-related functions
+│   └── google_search.py       # (Optional) Fallback for Google search
+├── summarization             # (Optional) Contains summarization logic
+│   └── summarizer.py          # (Optional) Functions for text summarization
+├── text_to_speech
+│   ├── audio_player.py        # (Optional) Audio player for TTS
+│   └── tts.py                 # TTS functions
+├── utils.py                   # Utility functions (document reader, etc.)
+├── langgraph_integration.py   # LangGraph API integration
+├── example_usage.py           # Example usage script
+├── requirements.txt           # Dependencies for the project
+├── app.py                     # FastAPI app to expose endpoints
+└── langgraph_studio_ui        # LangGraph Studio UI for visualization
+```
+
+## Installation
+
+### Prerequisites
+
+1. **Python 3.7+** (Make sure to have Python installed on your machine)
+2. **Pip** (Python's package installer)
+
+### Clone the Repository
+
+To begin, clone the repository and navigate into the project folder:
+
+```bash
+git clone https://github.com/yourusername/research-assistant.git
+cd research-assistant
+```
+
+### Install Dependencies
+
+The required Python dependencies are listed in the `requirements.txt` file. Install them using:
+
+```bash
+pip install -r requirements.txt
+```
+
+### Setup LangGraph
+
+1. **LangGraph API**: Obtain an API key from [LangGraph](https://www.langgraph.com).
+2. **Set API Key**: Update the `langgraph_integration.py` file with your API key.
+
+### Install Additional Tools
+
+To enable certain features, you may need to install the following tools:
+
+1. **gTTS (Google Text-to-Speech)**:
+   ```bash
+   pip install gtts
+   ```
+
+2. **Google Search** (for searching without an API key):
+   ```bash
+   pip install googlesearch-python
+   ```
+
+### Running the Application
+
+Start the FastAPI server with Uvicorn:
+
+```bash
+uvicorn app:app --reload
+```
+
+This will start the FastAPI server at `http://localhost:8000`. You can interact with the assistant through the API or use the provided example scripts.
+
+## Usage
+
+The assistant exposes several functionalities such as:
+
+1. **Search for Information**: Using the Google Search feature.
+2. **Summarize Text**: Summarize long documents or text.
+3. **Convert Text to Speech**: Convert text output to audible speech.
+4. **Read Documents**: Load and read documents from a specified folder.
+
+For detailed examples, refer to the `example_usage.py` file.
+
+```python
+# example_usage.py
+
+from research_assistant import ResearchAssistant
+
+# Initialize the Research Assistant
+assistant = ResearchAssistant()
+
+# Search for a topic
+search_results = assistant.search("latest advancements in AI")
+
+# Summarize the search results
+summary = assistant.summarize(search_results)
+
+# Convert the summary to speech and play it
+assistant.text_to_speech(summary)
+```
+
+You can also directly access the FastAPI endpoints, which are documented in the FastAPI server:
+
+- **GET `/search`**: Query a search term and return the top results.
+- **POST `/summarize`**: Provide a text to summarize.
+- **POST `/text_to_speech`**: Convert text to speech and play it.
+
+## Folder Details
+
+### **research_assistant.py**
+
+The main script that defines the assistant’s core functionalities. It integrates the various components (search, summarization, TTS) and exposes them via FastAPI.
+
+### **search_api/google_search.py**
+
+Provides a fallback Google search implementation using the `googlesearch-python` library. This is used to perform search queries without requiring an API key.
+
+### **summarization/summarizer.py**
+
+Contains the logic to summarize text. It utilizes LangGraph's powerful models or custom summarization techniques.
+
+### **text_to_speech/tts.py**
+
+Handles text-to-speech functionality using the `gTTS` library. Converts summarized text into speech and generates an audio file.
+
+### **text_to_speech/audio_player.py**
+
+Plays the audio generated by the `tts.py` script. It allows you to listen to the spoken output.
+
+### **utils.py**
+
+Utility functions used for reading documents, cleaning text, and saving files. It provides essential helper methods for file I/O operations.
+
+### **langgraph_integration.py**
+
+Contains the logic for integrating with LangGraph's API. This module connects to LangGraph for knowledge extraction and advanced querying.
+
+### **example_usage.py**
+
+An example usage script that demonstrates how to use the Research Assistant via a Python script. It shows how to search for information, summarize results, and convert text to speech.
+
+### **app.py**
+
+FastAPI application that exposes REST API endpoints for interacting with the Research Assistant. It connects all functionalities together and allows external applications to communicate with the assistant.
+
+### **langgraph_studio_ui**
+
+This folder contains the UI components that integrate with LangGraph Studio, allowing you to visualize the knowledge graphs and other insights generated by the assistant.
+
+---
+
+## Requirements
+
+The following are the core dependencies needed for this project:
+
+```txt
+fastapi==0.95.2
+uvicorn==0.22.0
+googlesearch-python==1.1.0
+gtts==2.2.3
+langgraph==2.0.0  # or the relevant version for LangGraph
+```
+
+You can install the dependencies by running:
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## Contributing
+
+We welcome contributions! To contribute, please fork the repository, make changes, and submit a pull request. Ensure that your code adheres to the project's coding standards and that all new functionality is thoroughly tested.
+
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature-branch`).
+3. Make your changes.
+4. Commit your changes (`git commit -am 'Add new feature'`).
+5. Push to the branch (`git push origin feature-branch`).
+6. Create a new pull request.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## Troubleshooting
+
+- If you encounter issues with `gTTS` or text-to-speech, make sure you have an internet connection as it requires an online API.
+- If Google search results do not return as expected, consider checking your network connection and retrying.
+- If LangGraph integration isn't working, verify that your API key is valid and check LangGraph’s documentation for changes.
+
