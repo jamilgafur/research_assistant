@@ -1,30 +1,12 @@
-# requirements.txt
-
-# FastAPI framework for building the web API
-fastapi==0.90.1
-
-# Uvicorn server for running FastAPI
-uvicorn==0.21.1
-
-# Requests library for making HTTP requests
-requests==2.28.2
-
-# LangGraph (hypothetical integration)
-# This will depend on how LangGraph is packaged, if it is a custom package, use it like so
-# langgraph==<version>  # Replace with the actual version or package if available
-
-# Google search package for non-API-based search
-googlesearch-python==1.0.0
-
-# PyTorch or other deep learning libraries for ML models (if needed for summarization or text-to-speech)
-torch==1.13.0  # Example, replace with required version if using deep learning models
-
-# gTTS for Text-to-Speech
-gTTS==2.3.0
-
-# Pydantic for model validation
+fastapi==0.95.2
+uvicorn==0.22.0
+requests==2.25.1
+langchain==0.0.192
+googlesearch-python==1.1.0
+gtts==2.2.3
 pydantic==1.10.2
-
-# Optional: Audio libraries for playing audio (depends on the OS)
 playsound==1.3.0
 pydub==0.25.1
+transformers
+selenium 
+webdriver-manager
