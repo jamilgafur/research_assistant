@@ -11,4 +11,3 @@ transformers
 selenium 
 webdriver-manager
 markitdown
-pydub
