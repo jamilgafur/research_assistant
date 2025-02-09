@@ -29,6 +29,7 @@ class TextSummarizer:
         - str: The summarized version of the input text.
         """
         try:
+            print(f"Summarizing: {text}")
             summary = self.summarizer(
                 text,
                 max_length=max_length,
@@ -41,7 +42,7 @@ class TextSummarizer:
 
     def summarize_multiple(self, texts: List[str], max_length: Optional[int] = 150, min_length: Optional[int] = 50) -> List[str]:
         """
-        Summarize multiple texts at once.
+        Summarize multiple texts sequentially.
 
         Parameters:
         - texts (List[str]): A list of input texts to summarize.
@@ -51,14 +52,11 @@ class TextSummarizer:
         Returns:
         - List[str]: A list of summarized texts.
         """
-        from concurrent.futures import ThreadPoolExecutor
-
-        def summarize_text(text: str):
-            return self.summarize(text, max_length, min_length)
-
+        summaries = []
         try:
-            with ThreadPoolExecutor() as executor:
-                summaries = list(executor.map(summarize_text, texts))
+            for text in texts:
+                summary = self.summarize(text, max_length, min_length)
+                summaries.append(summary)
             return summaries
         except Exception as e:
             raise Exception(f"An error occurred while summarizing multiple texts: {str(e)}")

@@ -23,31 +23,22 @@ class SearchAndSummarizeChain:
     
         logger.info(f"Running search, iterative reasoning, and summarization for {self.iterations} iterations.")
 
-        # Initialize the input for reasoning
-        current_input = self.text_input
-
-        # Perform iterative reasoning for the specified number of iterations
-        for iteration in range(1, self.iterations + 1):
-            logger.info(f"Iteration {iteration}: Reasoning with input text.")
-            # Perform reasoning with the current input
-            reasoning_result = self.llm_reasoner.query(current_input, self.question)
-            logger.debug(f"Reasoning result for iteration {iteration}: {reasoning_result[:200]}...")
-
-            # Update the current input with the reasoning result for the next iteration
-            current_input = reasoning_result
-
         # After the reasoning iterations, summarize the final result
         ts = TextSummarizer()
-        summary = ts.summarize(f"Final reasoning result: {current_input}")
+        summaries = []
+        for i, page in enumerate(self.text_input.split("Vol. 6,")):
+            summary = ts.summarize(page, len(page)//4)
+            summaries.append(summary)
+            self.speak(summary, f"{i}.mp3")
         logger.debug(f"Final summary result: {summary[:200]}...")
 
         return summary
         
-    def speak(self, text: str):
+    def speak(self, text: str, filename: str):
         """Convert text to speech."""
         try:
             tts = TextToSpeech()
-            tts.convert_text_to_speech(text)
+            tts.convert_text_to_speech(text, output_file=filename)
         except Exception as e:
             logger.error(f"Error in text-to-speech conversion: {str(e)}")
 
@@ -57,7 +48,6 @@ if __name__ == "__main__":
 
     text = PdfToMarkdown("/workspace/3555154.pdf").convert_pdf_to_markdown()
     print(text)
-    import pdb; pdb.set_trace()
     question = "summarize and inform me about this"
     
     # Initialize the chain with 4 iterations of reasoning
@@ -65,7 +55,8 @@ if __name__ == "__main__":
 
     try:
         result = search_and_summarize.run()
-
+        import pdb; pdb.set_trace()
+        print(f"results:{result}")
         if result:
             logger.info("Final summarized result:")
             logger.info(result)
