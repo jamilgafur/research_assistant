@@ -13,19 +13,24 @@ class LLMReasoning:
     """
     A class that facilitates interacting with a Large Language Model (LLM) for reasoning tasks.
     Supports both online service-based reasoning and local transformer models.
+    Includes techniques such as Chain-of-Thought, Data-driven reasoning, External memory, and Question Decomposition.
+    Additionally, it features a cycle-based reasoning process where the model talks to itself for better reasoning.
     """
 
-    def __init__(self, model_url: str = "http://your-llm-service.com/query", local_model_name: str = "bert-large-uncased"):
+    def __init__(self, model_url: str = "http://your-llm-service.com/query", local_model_name: str = "bert-large-uncased", max_cycles: int = 3):
         """
         Initializes the LLMReasoning instance.
         
         Parameters:
         - model_url (str): The URL of the LLM service. Default is a placeholder.
         - local_model_name (str): The pre-trained model name for local reasoning. Default is 'distilbert-base-uncased'.
+        - max_cycles (int): The maximum number of reasoning cycles for self-consistency.
         """
         self.model_url = model_url
         self.local_model_name = local_model_name
         self.local_model = None
+        self.memory = {}
+        self.max_cycles = max_cycles
         self._initialize_local_model()
 
     def _initialize_local_model(self):
@@ -62,7 +67,7 @@ class LLMReasoning:
         """
         result = None
         try:
-            # First attempt using online LLM service
+            # First attempt using online LLM service with reasoning techniques
             result = self._query_online_service(input_text, question)
         except Exception as e:
             logger.warning(f"Online LLM query failed: {e}. Attempting fallback to local model.")
@@ -77,7 +82,7 @@ class LLMReasoning:
 
     def _query_online_service(self, input_text: str, question: str) -> str:
         """
-        Helper function to query the LLM service online.
+        Helper function to query the LLM service online with enhanced reasoning techniques.
         
         Parameters:
         - input_text (str): The context text to be used by the model.
@@ -86,16 +91,19 @@ class LLMReasoning:
         Returns:
         - str: The response from the online service.
         """
-        payload = {"text": input_text, "question": question}
+        # Apply Chain-of-Thought reasoning
+        reasoning_prompt = f"Let's think this through step by step. {input_text}\nQuestion: {question}\nAnswer:"
+        
+        payload = {"text": reasoning_prompt, "question": question}
         response = requests.post(self.model_url, json=payload)
         response.raise_for_status()  # Will raise an exception if the status is not OK
         result = response.json().get('answer', 'No answer available')
-        logger.info("Received response from online LLM service.")
+        logger.info("Received response from online LLM service with reasoning.")
         return result
 
     def _query_local_model(self, input_text: str, question: str) -> str:
         """
-        Helper function to query the local transformer model for reasoning.
+        Helper function to query the local transformer model for reasoning, including techniques like data-driven reasoning.
         
         Parameters:
         - input_text (str): The context text to be used by the local model.
@@ -104,5 +112,47 @@ class LLMReasoning:
         Returns:
         - str: The answer provided by the local model.
         """
+        # Use data-driven/knowledge-based reasoning by leveraging stored memory
+        if question in self.memory:
+            return self.memory[question]
+        
         result = self.local_model(question=question, context=input_text)
-        return result['answer']
+        answer = result['answer']
+        
+        # Store result in memory for future reference (external memory technique)
+        self.memory[question] = answer
+        logger.info(f"Stored answer in memory for question: '{question}'")
+        return answer
+
+    def reason_through_cycles(self, input_text: str, question: str) -> str:
+        """
+        A cycle-based reasoning process where the model talks to itself to refine the answer.
+        The model goes through several reasoning cycles, refining its own answer each time.
+        
+        Parameters:
+        - input_text (str): The context text to be used by the model.
+        - question (str): The original question to be answered.
+        
+        Returns:
+        - str: The final answer after multiple cycles of reasoning.
+        """
+        # Initialize the answer with an initial query
+        current_answer = self.query(input_text, question)
+        logger.info(f"Initial answer: {current_answer}")
+        
+        for cycle in range(self.max_cycles):
+            logger.info(f"Starting reasoning cycle {cycle + 1}...")
+            
+            # Generate a follow-up question to refine the answer (talking to itself)
+            follow_up_question = f"Refine the answer to the following question: {question} \nGiven the answer: {current_answer} \nExplain your reasoning in detail."
+            refined_answer = self.query(input_text, follow_up_question)
+            
+            # Compare answers: If the answer is stable (no change), stop the cycles
+            if refined_answer == current_answer:
+                logger.info(f"Answer stabilized after {cycle + 1} cycles.")
+                break
+
+            current_answer = refined_answer
+        
+        return current_answer
+

@@ -2,6 +2,7 @@ import os
 from gtts import gTTS
 from typing import Optional
 import logging
+from pydub import AudioSegment  # For combining MP3 files
 import subprocess
 
 class TextToSpeech:
@@ -39,3 +40,37 @@ class TextToSpeech:
         except Exception as e:
             self.logger.error(f"Error occurred while converting text to speech: {str(e)}")
             raise
+
+    def combine_audio_files(self, output_file: Optional[str] = "combined_output.mp3") -> None:
+        """
+        Combines all the audio files stored in self.file_order into one large MP3 file.
+
+        Parameters:
+        - output_file (str): The name of the output file for the combined audio (default: 'combined_output.mp3').
+        """
+        # Create an empty audio segment
+        combined = AudioSegment.empty()
+
+        # Iterate through the files in self.file_order and append them
+        for file in self.file_order:
+            # Load each MP3 file
+            audio = AudioSegment.from_mp3(file)
+            combined += audio
+
+        # Export the combined audio to an MP3 file
+        combined.export(output_file, format="mp3")
+        self.logger.info(f"Combined audio saved to {output_file}")
+
+        # Optionally, clean up the individual files if no longer needed
+        self.cleanup_files()
+
+    def cleanup_files(self):
+        """
+        Clean up the individual audio files after combining them.
+        """
+        for file in self.file_order:
+            try:
+                os.remove(file)
+                self.logger.info(f"Deleted temporary file: {file}")
+            except Exception as e:
+                self.logger.warning(f"Error deleting file {file}: {e}")

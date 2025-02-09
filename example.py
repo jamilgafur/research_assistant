@@ -1,8 +1,8 @@
 import logging
-from summarization.summarizer import TextSummarizer
-from text_to_speech.tts import TextToSpeech
-from Reasoner.reasoning import LLMReasoning  # Import the LLMReasoning class
-from toMarkdown.Converter import PdfToMarkdown
+from researcher.summarization.summarizer import TextSummarizer
+from researcher.text_to_speech.tts import TextToSpeech
+from researcher.reasoner.reasoning import LLMReasoning
+from researcher.tomarkdown.Converter import PdfToMarkdown
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -28,42 +28,30 @@ class SearchAndSummarizeChain:
         # After the reasoning iterations, summarize the final result
         summaries = []
         for i, page in enumerate(self.text_input.split("Vol. 6,")):
-            summary = self.ts.summarize(page, len(page)//4)
-            summaries.append(summary)
-            self.speak(summary, f"{i}.mp3")
-        logger.debug(f"Final summary result: {summary[:200]}...")
-        import pdb; pdb.set_trace()
-        self.tts.combine_audio_files("3555154_pdf.mp3")
+            try:
+                summary = self.ts.summarize(page, len(page)//4)
+                summaries.append(summary)
+                self.tts.convert_text_to_speech(summary, output_file=f"{i}.mp3")
+            except:
+                continue
 
-        return summary
+        self.tts.combine_audio_files()
+
+        return ' '.join(summaries)
         
-    def speak(self, text: str, filename: str):
-        """Convert text to speech."""
-        try:
-            self.tts.convert_text_to_speech(text, output_file=filename)
-        except Exception as e:
-            logger.error(f"Error in text-to-speech conversion: {str(e)}")
 
 
 if __name__ == "__main__":
     logger.info("Starting the search, iterative reasoning, and summarize process.")
 
     text = PdfToMarkdown("/workspace/3555154.pdf").convert_pdf_to_markdown()
-    print(text)
     question = "summarize and inform me about this"
     
     # Initialize the chain with 4 iterations of reasoning
     search_and_summarize = SearchAndSummarizeChain(text, question, iterations=1)
 
-    try:
-        result = search_and_summarize.run()
-        print(f"results:{result}")
-        if result:
-            logger.info("Final summarized result:")
-            logger.info(result)
-            search_and_summarize.speak(result)
-            print(result)
-        else:
-            logger.warning("No result to display.")
-    except Exception as e:
-        logger.error(f"Error in main execution: {e}")
+    result = search_and_summarize.run()
+    print(f"results:{result}")
+    logger.info("Final summarized result:")
+    logger.info(result)
+    print(result)
