@@ -2,6 +2,7 @@ import os
 from gtts import gTTS
 from typing import Optional
 import logging
+import subprocess
 
 class TextToSpeech:
     """
@@ -17,6 +18,7 @@ class TextToSpeech:
         """
         self.language = language
         self.logger = logging.getLogger(__name__)
+        self.file_order = []
 
     def convert_text_to_speech(self, text: str, output_file: Optional[str] = None) -> None:
         """
@@ -32,6 +34,7 @@ class TextToSpeech:
                 output_file = f"output_{os.getpid()}.mp3"
             
             tts.save(output_file)
+            self.file_order.append(output_file)
             self.logger.info(f"Speech saved to {output_file}")
         except Exception as e:
             self.logger.error(f"Error occurred while converting text to speech: {str(e)}")

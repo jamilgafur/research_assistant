@@ -15,7 +15,9 @@ class SearchAndSummarizeChain:
         self.text_input = text_input
         self.question = question
         self.iterations = iterations  # Set the number of iterations for reasoning
-        self.llm_reasoner = LLMReasoning()  # Initialize the reasoning module
+        self.ts = TextSummarizer()
+        self.tts = TextToSpeech()
+
         logger.info("SearchAndSummarizeChain initialized.")
 
     def run(self):
@@ -24,21 +26,21 @@ class SearchAndSummarizeChain:
         logger.info(f"Running search, iterative reasoning, and summarization for {self.iterations} iterations.")
 
         # After the reasoning iterations, summarize the final result
-        ts = TextSummarizer()
         summaries = []
         for i, page in enumerate(self.text_input.split("Vol. 6,")):
-            summary = ts.summarize(page, len(page)//4)
+            summary = self.ts.summarize(page, len(page)//4)
             summaries.append(summary)
             self.speak(summary, f"{i}.mp3")
         logger.debug(f"Final summary result: {summary[:200]}...")
+        import pdb; pdb.set_trace()
+        self.tts.combine_audio_files("3555154_pdf.mp3")
 
         return summary
         
     def speak(self, text: str, filename: str):
         """Convert text to speech."""
         try:
-            tts = TextToSpeech()
-            tts.convert_text_to_speech(text, output_file=filename)
+            self.tts.convert_text_to_speech(text, output_file=filename)
         except Exception as e:
             logger.error(f"Error in text-to-speech conversion: {str(e)}")
 
@@ -55,7 +57,6 @@ if __name__ == "__main__":
 
     try:
         result = search_and_summarize.run()
-        import pdb; pdb.set_trace()
         print(f"results:{result}")
         if result:
             logger.info("Final summarized result:")
