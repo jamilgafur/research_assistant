@@ -1,7 +1,6 @@
-# text_to_speech/audio_player.py
-
-from playsound import playsound
 import os
+import logging
+from playsound import playsound
 
 class AudioPlayer:
     """
@@ -12,7 +11,7 @@ class AudioPlayer:
         """
         Initialize the AudioPlayer class.
         """
-        pass
+        self.logger = logging.getLogger(__name__)
 
     def play_audio(self, audio_file: str) -> None:
         """
@@ -22,13 +21,15 @@ class AudioPlayer:
         - audio_file (str): The path to the audio file to be played.
         """
         try:
-            # Check if the audio file exists
             if not os.path.exists(audio_file):
                 raise FileNotFoundError(f"The audio file {audio_file} does not exist.")
-
-            # Play the audio file
+            
+            # Optionally, validate the file extension to check for supported audio formats
+            if not audio_file.lower().endswith(('.mp3', '.wav', '.ogg')):
+                raise ValueError(f"Unsupported file format: {audio_file}")
+            
             playsound(audio_file)
-            print(f"Playing {audio_file}...")
+            self.logger.info(f"Playing {audio_file}...")
         except Exception as e:
-            raise Exception(f"Error occurred while playing the audio: {str(e)}")
-
+            self.logger.error(f"Error occurred while playing the audio: {str(e)}")
+            raise

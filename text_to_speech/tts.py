@@ -1,8 +1,7 @@
-# text_to_speech/tts.py
-
-from gtts import gTTS
 import os
+from gtts import gTTS
 from typing import Optional
+import logging
 
 class TextToSpeech:
     """
@@ -17,6 +16,7 @@ class TextToSpeech:
         - language (str): Language for TTS. Default is 'en' (English).
         """
         self.language = language
+        self.logger = logging.getLogger(__name__)
 
     def convert_text_to_speech(self, text: str, output_file: Optional[str] = None) -> None:
         """
@@ -25,19 +25,14 @@ class TextToSpeech:
         Parameters:
         - text (str): The input text to be converted to speech.
         - output_file (str, optional): If provided, the audio file will be saved with this name.
-          Otherwise, a temporary file will be created.
         """
         try:
-            # Generate speech from text using gTTS
             tts = gTTS(text=text, lang=self.language, slow=False)
-            
-            # If no output file is provided, generate a temporary file
             if not output_file:
-                output_file = "output.mp3"
+                output_file = f"output_{os.getpid()}.mp3"
             
-            # Save the speech to an audio file
             tts.save(output_file)
-            print(f"Speech saved to {output_file}")
+            self.logger.info(f"Speech saved to {output_file}")
         except Exception as e:
-            raise Exception(f"Error occurred while converting text to speech: {str(e)}")
-
+            self.logger.error(f"Error occurred while converting text to speech: {str(e)}")
+            raise
