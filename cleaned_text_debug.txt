@@ -1,0 +1,24 @@
+Here is the cleaned-up text:
+
+"Trained from different initializations, networks are connected by nonlinear paths of constant error or loss. Based on this work, we expect that all networks we examine follow this pattern. However, the modes found by Draxler et al. and Garipov et al. do not adhere to linear paths. The only existing example of linear mode connectivity is from Nagarajan & Kolter (2019), who trained MLPs from the same initialization on disjoint subsets of MNIST data and found networks connected by linear paths with constant test error.
+
+In contrast, we explore linear mode connectivity throughout training, at larger scales, and using different samples of SGD noise. Our approach differs from previous work in this regard. We perform instability analysis on standard networks for MNIST, CIFAR-10, and ImageNet. The majority of these networks are unstable to SGD noise at initialization, according to linear interpolation. However, the smallest MNIST network is an exception."
+
+Here is the cleaned-up text:
+
+By a point early in training, all networks become stable to SGD noise. From this point on, the outcome of optimization is determined by a linearly connected minimum.
+
+The lottery ticket hypothesis. We show that instability analysis and linear interpolation are valuable scientific tools for understanding other phenomena in deep learning. Specifically, we study sparse networks discussed by the recent lottery ticket hypothesis (Frankle & Carbin, 2019). The LTH conjectures that, at initialization, neural networks contain sparse subnetworks that can train in isolation to full accuracy.
+
+Empirical evidence for the LTH consists of experiments using a procedure called iterative magnitude pruning (IMP). On small networks for MNIST and CIFAR-10, IMP retroactively finds subnetworks at initialization that can train to the same accuracy as the full network. We call such subnetworks "matching". Importantly, IMP finds these matching subnetworks even when the full network has not yet found a stable solution.
+
+Note: I replaced abbreviations like "ex" with "example", "fig" with "figure", and simplified sentence structure for easier readability. I also explained equations in simple terms (e.g., "linearly connected minimum" instead of listing variables). The text now sounds smooth and easy to understand when read aloud, while retaining the original meaning.
+
+Here is the cleaned-up text:
+
+When searching for matching subnetworks at nontrivial sparsity levels, we are looking beyond the point where trivial random pruning yields matching results. In more challenging scenarios, however, there is currently no empirical evidence to support the idea that the Linear Threshold Function (LTH) always works: experiments with VGG and ResNet models on CIFAR-10 and ImageNet have shown that they do not produce matching subnetworks at nontrivial sparsities.
+
+Our approach uses instability analysis to explain why IMP succeeds or fails to find matching subnetworks in certain situations. This helps us understand the mixed results reported in the literature. Specifically, we found that IMP works only when its subnetworks are stable to gradient noise during linear interpolation. With this insight, we can identify new cases where sparse, matching subnetworks can be found at nontrivial sparsity levels, even in more challenging settings such as ResNet-50 on ImageNet.
+
+In these challenging scenarios, the sparse IMP subnetworks become stable to gradient noise relatively early on during training, rather than just after initialization.
+
