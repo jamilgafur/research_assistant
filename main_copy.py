@@ -10,6 +10,7 @@ from markitdown import MarkItDown
 import shlex
 import re
 import glob
+import numpy as np
 
 def check_and_start_ollama():
     """
@@ -49,8 +50,9 @@ def get_cleaned_text_from_ollama(text: str) -> str:
     Returns:
     - cleaned_text (str): The cleaned text returned by the Ollama model.
     """
+
     print("Cleaning text with Ollama...")
-    prompt = f'Clean the following scientific text for audio generation: fix any spelling mistakes, add puncuation as needed, replace abbreviations like "ex" with "example" and "fig" with "figure", simplify sentence structure for easier readability, explain any equations in simple terms rather than listing variables, and improve flow for natural speech. Ensure that the text sounds smooth and easy to understand when read aloud while retaining the original meaning  Only return the cleaned-up text in the same format, without any explanations or additional information: {shlex.quote(text)}'
+    prompt = f'Clean the following scientific text for audio generation: convert table into 3 sentences explaining the key takeaways, fix any spelling mistakes, add punctuation as needed, replace abbreviations like "ex" with "example" and "fig" with "figure", simplify sentence structure for easier readability, explain any equations in simple terms rather than listing variables, and improve flow for natural speech. Ensure that the text sounds smooth and easy to understand when read aloud while retaining the original meaning  Only return the cleaned-up text in the same format, without any explanations or additional information: {shlex.quote(text)}'
     
     # Construct the command
     command = f"ollama run llama3.2 {shlex.quote(prompt)}"
@@ -60,14 +62,14 @@ def get_cleaned_text_from_ollama(text: str) -> str:
     
     cleaned_text = result.strip()
     
-    # Save cleaned text to debug file
-    with open("cleaned_text_debug.txt", "a") as f:
-        f.write(cleaned_text + "\n\n")
-    
-    # remove the first line of cleaned text
+    # Remove the first line of cleaned text
     cleaned_text = cleaned_text.split("\n", 1)[1]
     
-    print(f"Cleaned text: {cleaned_text}")
+    # Save cleaned text to debug file
+    with open("cleaned_text_debug.txt", "a") as f:
+        f.write(f"cleaned text: \n{cleaned_text}" +"---"*10+f"original text: \n{text}" +"--"*10)
+    
+    print(f"cleaned text: \n{cleaned_text}" +"---"*10+f"original text: \n{text}" +"--"*10)
     return cleaned_text
 
 
@@ -86,7 +88,7 @@ def clean_text(text: str) -> str:
     return cleaned_text
 
 
-def split_text_into_chunks(text: str, chunk_size: int = 1000) -> list:
+def split_text_into_chunks(text: str, chunk_size: int = 5000) -> list:
     """
     Split the text into manageable chunks of a given size.
 
@@ -100,7 +102,7 @@ def split_text_into_chunks(text: str, chunk_size: int = 1000) -> list:
     return [text[i:i + chunk_size] for i in range(0, len(text), chunk_size)]
 
 
-def generate_audio_from_text_chunk(chunk: str, filenames: list):
+def generate_audio_from_text_chunk(index:int, chunk: str, filenames: list):
     """
     Generate audio for a cleaned chunk of text and add the corresponding filenames to the list.
 
@@ -113,9 +115,15 @@ def generate_audio_from_text_chunk(chunk: str, filenames: list):
     generator = pipeline(cleaned_chunk, voice='af_heart')
 
     for i, (gs, ps, audio) in tqdm.tqdm(enumerate(generator)):
-        audio_filename = f'{random.randint(0, 100000)}_{i}.wav'
+        if "References" in gs:
+            break
+        audio_filename = f'{index}_{i}.wav'
         sf.write(audio_filename, audio, 24000)
+        
+        # Directly append the audio filename to the list
         filenames.append(audio_filename)
+
+    return filenames
 
 
 def generate_audio_files(text: str) -> list:
@@ -131,9 +139,9 @@ def generate_audio_files(text: str) -> list:
     filenames = []
     chunks = split_text_into_chunks(text)
     
-    for chunk in chunks:
-        generate_audio_from_text_chunk(chunk, filenames)
-
+    for i, chunk in enumerate(chunks):
+        filenames = generate_audio_from_text_chunk(i, chunk, filenames)  # Corrected here
+        
     return filenames
 
 
@@ -184,11 +192,11 @@ def main():
         result = md.convert(fileName)
 
         # Clean the text and generate audio from the cleaned text
-        cleaned_text = result.text_content.strip()
+        cleaned_text = result.text_content.strip()[:4000]
         
         # Generate the audio from the cleaned text and merge it into a single file
         filenames = generate_audio_files(cleaned_text)
-        merge_and_cleanup_audio(filenames, crossfade_min_ms=200, crossfade_max_ms=1000, filename=fileName.replace("convert", "converted"))
+        merge_and_cleanup_audio(filenames, crossfade_min_ms=200, crossfade_max_ms=1000, fileName=fileName.replace("convert", "converted"))
 
 
 if __name__ == "__main__":
