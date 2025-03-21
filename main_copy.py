@@ -22,6 +22,29 @@ from audioprocessor import AudioProcessor
 from fileprocessor import FileProcessor
 
 
+def processFile(filename, file_processor):
+    # Implement your file processing logic here
+    print(f"Processing file: {filename}")
+    
+    
+    # Initialize services
+    ollama_service = OllamaService(model_name=args.model)
+    ollama_service.check_and_start_ollama()
+
+    text_processor = TextProcessor(ollama_service)
+    audio_processor = AudioProcessor()
+
+    file_processor = FileProcessor(ollama_service, text_processor, audio_processor)
+    file_processor.process_text_and_generate_audio(filename, "temp_audio.wav")
+
+
+def process_directory(directory_path):
+    # Loop through all files in the directory and process them
+    for file_path in Path(directory_path).rglob('*'):
+        if file_path.is_file():
+            processFile(file_path)
+
+
 def main():
     """
     Main function to convert various types of input (text, PDF, URL) into speech and merge the audio.
@@ -33,20 +56,12 @@ def main():
     parser.add_argument('--crossfade_max_ms', type=int, default=1000, help="Maximum crossfade duration in milliseconds.")
     args = parser.parse_args()
 
-    # Initialize services
-    ollama_service = OllamaService(model_name=args.model)
-    ollama_service.check_and_start_ollama()
-
-    text_processor = TextProcessor(ollama_service)
-    audio_processor = AudioProcessor()
-
-    file_processor = FileProcessor(ollama_service, text_processor, audio_processor)
-
-    if not os.path.exists(args.input_path):
-        print(f"Error: The path {args.input_path} does not exist.")
-        sys.exit(1)
-    # Process the input file or URL
-    file_processor.process_text_and_generate_audio(args.input_path, "temp.wav")
+    # Check if input_path is a directory or a single file
+    if os.path.isdir(args.input_path):
+        print(f"Directory detected. Processing all files in {args.input_path}")
+        process_directory(args.input_path,file_processor)
+    else:
+        processFile(args.input_path,file_processor)
 
 
 if __name__ == "__main__":

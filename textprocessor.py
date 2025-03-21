@@ -28,13 +28,17 @@ class TextProcessor:
         cleaned_text = cleaned_text.strip()
         return cleaned_text
 
-    def split_text_into_paragraphs(self, text: str) -> list:
+    def split_text_into_paragraphs(self, text: str, groupings:int =7) -> list:
         """
         Split the text into paragraphs. Paragraphs are separated by double newlines.
         """
-        paragraphs = text.split('\n\n')  # Split by double line breaks (paragraphs)
-        
-        return [self.clean_text(p).strip().replace("\n", " ") for p in paragraphs if p.strip()]
+        # paragraph is based on 5 sentences ended with a period and empty space and then list comprhension to merge into 5 sentences or a paragraph
+        #  "period with one space is a sentece
+        sentences = re.split(r'(?<=[.!?]) +', text)
+        sentences = [s.strip().replace("\n", " ") for s in sentences]
+        paragraphs = [sentences[i:i + groupings] for i in range(0, len(sentences), groupings)]
+        paragraphs = [' '.join(p) for p in paragraphs]
+        return paragraphs
 
     def generate_audio_files(self, text: str) -> list:
         """
